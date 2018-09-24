@@ -1,0 +1,54 @@
+<ion-header>
+
+  <ion-navbar>
+    <ion-title>Shopping List</ion-title>
+  </ion-navbar>
+
+</ion-header>
+
+<!--
+
+template driven
+
+1.) form -> automatikusan generálódik  <form> blokkra
+2.) meg kell jelölni melyik contorlok tartoznak a formhoz => ngModel
+3.) #f="ngForm" (ngSubmit)="onAddItem(f)"
+4.) validáció
+
+-->
+
+<ion-content padding>
+  <form #f="ngForm" (ngSubmit)="onAddItem(f)">
+    <ion-list>
+      <ion-item>
+        <ion-label floating>Ingredient Name</ion-label>
+        <ion-input
+          type="text"
+          name="ingredientName"
+          ngModel
+          required
+        ></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label floating>Amount</ion-label>
+        <ion-input
+          type="number"
+          name="ingredientAmount"
+          ngModel
+          required
+        ></ion-input>
+      </ion-item>
+    </ion-list>
+    <button ion-button type="submit" block [disabled]="!f.valid">Add</button>
+  </form>
+
+  <ion-list>
+    <ion-list-header *ngIf="listItems.length > 0">
+      <h2>Saved Ingredients</h2>
+    </ion-list-header>
+    <ion-item *ngFor="let item of listItems; let i = index" (press)="onPress(i)">
+      <h3>{{item.name}} <small> ( {{item.amount}} ) </small> </h3>
+    </ion-item>
+  </ion-list>
+
+</ion-content>
