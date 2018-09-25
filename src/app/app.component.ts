@@ -7,7 +7,7 @@ import * as firebase from 'firebase';
 import {TabsPage} from '../pages/tabs/tabs';
 import {SigninPage} from "../pages/signin/signin";
 import {SignupPage} from "../pages/signup/signup";
-import {AuthService} from "../pages/services/Auth.service";
+import {AuthService} from '../services/Auth.service';
 
 @Component({
   templateUrl: 'app.html'
@@ -27,6 +27,7 @@ export class MyApp {
     splashScreen: SplashScreen,
     private menuCtrl: MenuController,
     private auth: AuthService
+
   ) {
 
     firebase.initializeApp({

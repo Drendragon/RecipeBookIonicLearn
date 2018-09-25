@@ -25,6 +25,7 @@ export class RecipePage implements OnInit {
   constructor(public navCtrl: NavController, public navParams: NavParams,
               private shoppingListService: ShoppingListService,
               private recipesService: RecipeService) {
+
   }
 
 
@@ -35,6 +36,10 @@ export class RecipePage implements OnInit {
   ngOnInit(): void {
     this.recipe = this.navParams.get('recipe');
     this.index = this.navParams.get('index');
+
+    if(this.recipe.ingredients == null || this.recipe.ingredients == []){
+      this.recipe.ingredients = [];
+    }
   }
 
   onEdit() {

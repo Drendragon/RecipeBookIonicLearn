@@ -1,15 +1,20 @@
 import {ToastController} from "ionic-angular";
 import {Injectable} from "@angular/core";
 import {RecipeModel} from "../models/Recipe.model";
+import {HttpClient} from "@angular/common/http";
+import {AuthService} from "./Auth.service";
 
 @Injectable()
 export class RecipeService {
 
   private _recipes: RecipeModel[] = [];
 
-  constructor(private toastCtrl: ToastController){}
+  constructor(private toastCtrl: ToastController,
+              private http: HttpClient,
+              private auth: AuthService) {
+  }
 
-  addRecipe(item: RecipeModel){
+  addRecipe(item: RecipeModel) {
     this._recipes.push(item);
 
     const toast = this.toastCtrl.create({
@@ -23,7 +28,10 @@ export class RecipeService {
 
   }
 
-  getRecipes(): RecipeModel[]{
+  getRecipes(): RecipeModel[] {
+    if (this._recipes == [] || this._recipes == null)
+      this._recipes = [];
+
     return this._recipes.slice();
   }
 
@@ -38,7 +46,7 @@ export class RecipeService {
     toast.present();
   }
 
-  updateRecipe(index: number, item: RecipeModel){
+  updateRecipe(index: number, item: RecipeModel) {
     this._recipes[index] = item;
 
     const toast = this.toastCtrl.create({
@@ -48,6 +56,33 @@ export class RecipeService {
     });
     toast.present();
 
+  }
+
+  storeRecipes(token: string) {
+    const userID = this.auth.getActiveUser().uid;
+    return this.http.put(
+      'https://angular-learn-6e26d.firebaseio.com/' + userID + '/recipes.json?auth=' + token,
+      this._recipes
+    ).map(
+      (response: Response) => {
+        return response;
+      }
+    );
+  }
+
+  fetchRecipes(token: string) {
+    const userID = this.auth.getActiveUser().uid;
+    return this.http.get<RecipeModel[]>(
+      'https://angular-learn-6e26d.firebaseio.com/' + userID + '/recipes.json?auth=' + token
+    ).map(
+      (response) => {
+        return response;
+      }
+    ).do(
+      (data) => {
+        this._recipes = data;
+      }
+    );
   }
 
 }

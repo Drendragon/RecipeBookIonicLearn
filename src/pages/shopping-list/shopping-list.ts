@@ -1,8 +1,17 @@
 import {Component} from '@angular/core';
-import {IonicPage, NavController, NavParams} from 'ionic-angular';
+import {
+  AlertController,
+  IonicPage,
+  LoadingController,
+  NavController,
+  NavParams,
+  PopoverController
+} from 'ionic-angular';
 import {NgForm} from "@angular/forms";
 import {ShoppingListService} from "../../services/ShoppingList.service";
 import {IngredientModel} from "../../models/Ingredient.model";
+import {SlOptionsPage} from "./sl-options/sl-options";
+import {AuthService} from "../../services/Auth.service";
 
 /**
  * Generated class for the ShoppingListPage page.
@@ -22,7 +31,11 @@ export class ShoppingListPage {
   constructor(
     public navCtrl: NavController,
     public navParams: NavParams,
-    private shoppingListService: ShoppingListService
+    private shoppingListService: ShoppingListService,
+    private popoverCtrl: PopoverController,
+    private auth: AuthService,
+    private loadingCtrl: LoadingController,
+    private alert: AlertController
   ) {
     this.reloadList();
   }
@@ -39,7 +52,7 @@ export class ShoppingListPage {
     this.reloadList();
   }
 
-  ionViewWillEnter(){
+  ionViewWillEnter() {
     this.reloadList();
   }
 
@@ -50,5 +63,69 @@ export class ShoppingListPage {
 
   reloadList() {
     this.listItems = this.shoppingListService.getIngradiens();
+  }
+
+  onShowActions(ev: MouseEvent) {
+
+    const loader = this.loadingCtrl.create(
+      {
+        content: "Working..."
+      }
+    );
+
+    const options = this.popoverCtrl.create(SlOptionsPage);
+    options.present({ev: ev});
+
+    options.onDidDismiss(
+      (data) => {
+        if (!data) {
+          return;
+        }
+        if (data.action == 'load') {
+          loader.present();
+          this.auth.getActiveUser().getIdToken().then(
+            (token: string) => {
+              this.shoppingListService.fetchList(token).subscribe(
+                () => {
+                  loader.dismiss();
+                  this.reloadList();
+                },
+                error => {
+                  loader.dismiss();
+                  this.handleError(error.message);
+                }
+              );
+            }
+          );
+
+        } else if (data.action == 'store') {
+          loader.present();
+          this.auth.getActiveUser().getIdToken().then(
+            (token: string) => {
+              this.shoppingListService.storeList(token).subscribe(
+                () => loader.dismiss(),
+                error => {
+                  loader.dismiss();
+                  this.handleError(error.message);
+                }
+              );
+            }
+          );
+
+        }
+      }
+    )
+
+  }
+
+  handleError(errorMsg: string) {
+    const alert = this.alert.create({
+      title: 'Error occured',
+      message: errorMsg,
+      buttons: [
+        'OK'
+      ]
+    });
+    alert.present();
   }
 }
